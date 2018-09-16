@@ -59,3 +59,9 @@ typings/
 
 # next.js build output
 .next
+
+#discord token
+token.txt
+
+#folder path
+path.txt

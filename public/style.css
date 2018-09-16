@@ -1,0 +1,11 @@
+.audio {
+    display: flex;
+    flex-direction: row;
+}
+.audio > div {
+    flex: 1;
+}
+
+a:hover {
+    cursor: pointer;
+}

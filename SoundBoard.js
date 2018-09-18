@@ -27,6 +27,7 @@ class SoundBoard {
         this.watcher.on('create', (file, stats) => {
             let treeArray = file.split('\\')
             this.tree.find(object => object.folder === treeArray[1]).files.push(treeArray[2])
+            io.emit('newFile', file)
         })
     }
 
@@ -68,7 +69,7 @@ class SoundBoard {
             socket.on('volume', value => {
                 if (value <= 2.5 && this.bot.isPlaying) {
                     this.bot.setVolume(value)
-                    io.broadcast.emit('volume', value)
+                    socket.broadcast.emit('volume', value)
                 }
             })
             socket.on('logOut', () => {
@@ -110,6 +111,10 @@ class SoundBoard {
         })
 
         app.get('/', (req, res) => {
+            res.sendFile('index.html', {root: __dirname })
+        })
+
+      /*  app.get('/', (req, res) => {
             res.writeHead(200, { 'Content-Type': 'text/html' });
             res.write("<meta charset='UTF-8'>");
             res.write('<link rel="stylesheet" type="text/css" href="style.css">')
@@ -145,8 +150,8 @@ class SoundBoard {
             })
             res.write('</div>');
             return res.end();
-        });
+        }); */
     }
 }
 
-soundBoard = new SoundBoard('C:/Users/Hillo/Dropbox/Tony Halme/', 'NDg5OTA3NDQ0NTg4MjE2MzMz.Dnxlag.39UBbrx6WwcK_WuDnzjA7PdjQLY', 'Maan Siirto Firma')
+soundBoard = new SoundBoard('', '', '')

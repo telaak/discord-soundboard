@@ -1,8 +1,8 @@
-.audio {
+#fileTree {
     display: flex;
     flex-direction: row;
 }
-.audio > div {
+#fileTree > div {
     flex: 1;
 }
 

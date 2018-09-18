@@ -69,14 +69,23 @@ function logOut() {
     socket.emit('logOut')
 }
 
+function replay() {
+    socket.emit('replay')
+}
+
 socket.on('volume', function (value) {
     let slider = document.getElementById('slider')
     slider.value = value
 })
 
-socket.on('nowPlaying', function (fileName) {
+socket.on('nowPlaying', function (name, url="") {
     let nowPlaying = document.getElementById('nowPlaying')
-    nowPlaying.textContent = fileName
+    if(url !== "") {
+        let html = "<a href='" + url + "'>" + name + "</a>"
+        nowPlaying.innerHTML = html
+    } else {
+        nowPlaying.textContent = name
+    }
 })
 
 socket.on('newFile', function (fileName) {
@@ -91,5 +100,5 @@ socket.on('newFile', function (fileName) {
     })
     li.textContent = fileName
     ul.appendChild(li)
-    
+
 })

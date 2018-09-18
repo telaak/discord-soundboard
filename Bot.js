@@ -18,7 +18,7 @@ class Bot {
     }
 
     replay() {
-        play(this.nowPlaying)
+        this.play(this.nowPlaying)
     }
 
     stopLoop() {

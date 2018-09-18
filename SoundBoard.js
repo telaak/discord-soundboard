@@ -126,4 +126,4 @@ class SoundBoard {
     }
 }
 
-soundBoard = new SoundBoard('', '', '', '')
+module.exports = SoundBoard

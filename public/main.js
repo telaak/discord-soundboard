@@ -8,6 +8,7 @@ onload = function () {
         .then(function (myJson) {
             tree = myJson
             buildFileTree()
+            createEmitters()
         });
 }
 

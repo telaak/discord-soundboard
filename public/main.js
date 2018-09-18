@@ -91,7 +91,10 @@ socket.on('nowPlaying', function (name, url="") {
 
 socket.on('newFile', function (fileName) {
     let treeArray = fileName.split('//')[1].split('/')
-    tree.find(object => object.folder === treeArray[0]).files.push(treeArray[1])
+    let folder = tree.find(object => object.folder === treeArray[0]).files
+    let index = folder.findIndex(letter => letter > treeArray[1])
+    folder.splice(index, 0, treeArray[1])
+    console.log(folder)
     let fileTree = document.getElementById('fileTree')
     let ul = document.getElementById(treeArray[0]).getElementsByTagName('ul')[0]
     let li = document.createElement('li')
@@ -100,6 +103,8 @@ socket.on('newFile', function (fileName) {
         emitVolume()
     })
     li.textContent = treeArray[1]
-    ul.appendChild(li)
+    console.log(ul)
+    console.log(ul.childNodes[index])
+    ul.insertBefore(li, ul.childNodes[index])
 
 })

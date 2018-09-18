@@ -4,7 +4,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const fs = require('fs');
 const cors = require('cors')
-const Bot = require('./Bot.js')
+const Bot = require('./bot.js')
 const hound = require('hound')
 const fetch = require('node-fetch');
 
@@ -27,9 +27,9 @@ class SoundBoard {
     }
 
     watchFileChanges() {
-        this.watcher.on('create', (file, stats) => {
-            let treeArray = file.split('\\')
-            this.tree.find(object => object.folder === treeArray[1]).files.push(treeArray[2])
+        this.watcher.on('create', (file, stats) => {  
+	    let treeArray = file.split("//")[1].split("/")
+            this.tree.find(object => object.folder === treeArray[0]).files.push(treeArray[1])
             io.emit('newFile', file)
         })
     }
@@ -41,8 +41,8 @@ class SoundBoard {
     }
 
     listen() {
-        http.listen(80, () => {
-            console.log('listening on *:80');
+        http.listen(8080, () => {
+            console.log('listening on *:8080');
         });
     }
 

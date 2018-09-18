@@ -1,7 +1,7 @@
 let socket = io();
 let tree = []
 onload = function () {
-    fetch('http://localhost/files')
+    fetch('http://laaksonen.me:8080/files')
         .then(function (response) {
             return response.json();
         })
@@ -90,16 +90,16 @@ socket.on('nowPlaying', function (name, url="") {
 })
 
 socket.on('newFile', function (fileName) {
-    let treeArray = fileName.split('\\')
-    tree.find(object => object.folder === treeArray[1]).files.push(treeArray[2])
+    let treeArray = fileName.split('//')[1].split('/')
+    tree.find(object => object.folder === treeArray[0]).files.push(treeArray[1])
     let fileTree = document.getElementById('fileTree')
-    let ul = file.getElementById(treeArray[1]).getElementsByTagName('ul')[0]
+    let ul = document.getElementById(treeArray[0]).getElementsByTagName('ul')[0]
     let li = document.createElement('li')
     li.addEventListener('click', function (evt) {
-        socket.emit('playFile', fileName)
+        socket.emit('playFile', fileName.split('//')[1])
         emitVolume()
     })
-    li.textContent = fileName
+    li.textContent = treeArray[1]
     ul.appendChild(li)
 
 })

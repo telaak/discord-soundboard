@@ -29,7 +29,9 @@ class SoundBoard {
     watchFileChanges() {
         this.watcher.on('create', (file, stats) => {  
 	    let treeArray = file.split("//")[1].split("/")
-            this.tree.find(object => object.folder === treeArray[0]).files.push(treeArray[1])
+            let folder = this.tree.find(object => object.folder === treeArray[0]).files
+            let index = folder.findIndex(letter => letter > treeArray[1])
+            folder.splice(index, 0, treeArray[1])
             io.emit('newFile', file)
         })
     }

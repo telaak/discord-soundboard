@@ -3,60 +3,112 @@ const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const fs = require('fs');
+const cors = require('cors')
 const Bot = require('./Bot.js')
-bot = new Bot('', '', 'Maan Siirto Firma')
+const hound = require('hound')
+
+app.use(express.static('public'))
+app.use(cors())
 
 class SoundBoard {
-    constructor(path) {
-        this.path = bot.path
-        app.use(express.static('public'))
+    constructor(path, botToken, channelName) {
+        this.bot = new Bot(botToken, path, channelName)
+        this.watcher = hound.watch(path)
+        this.path = path
+        this.tree = []
         this.listen()
         this.express()
         this.socketIO()
+        this.getFiles()
+        this.watchFileChanges()
+    }
+
+    watchFileChanges() {
+        this.watcher.on('create', (file, stats) => {
+            let treeArray = file.split('\\')
+            this.tree.find(object => object.folder === treeArray[1]).files.push(treeArray[2])
+        })
+    }
+
+    sortFiles() {
+        this.tree.forEach(object => {
+            object.files.sort()
+        })
     }
 
     listen() {
-        http.listen(80, function () {
+        http.listen(80, () => {
             console.log('listening on *:80');
         });
     }
 
     socketIO() {
-        io.on('connection', function (socket) {
-            socket.on('playFile', function (fileName) {
-                if (!bot.isPlaying) {
-                    bot.play(fileName)
+        io.on('connection', socket => {
+            socket.on('playFile', fileName => {
+                if (!this.bot.isPlaying) {
+                    this.bot.play(fileName)
                     io.emit('nowPlaying', fileName)
                 }
             });
-            socket.on('playUrl', function (url) {
-                if (!bot.isPlaying) {
-                    bot.play(url)
+            socket.on('playUrl', url => {
+                if (!this.bot.isPlaying) {
+                    this.bot.play(url)
                     io.emit('nowPlaying', url)
                 }
             })
-            socket.on('stopPlaying', function () {
-                bot.stopPlaying()
+            socket.on('stopPlaying', () => {
+                this.bot.stopPlaying()
             })
-            socket.on('pausePlaying', function () {
-                bot.pausePlaying()
+            socket.on('pausePlaying', () => {
+                this.bot.pausePlaying()
             })
-            socket.on('resumePlaying', function () {
-                bot.resumePlaying()
+            socket.on('resumePlaying', () => {
+                this.bot.resumePlaying()
             })
-            socket.on('volume', function (value) {
-                if (value <= 2.5 && bot.isPlaying) {
-                    bot.setVolume(value)
-                    io.emit('volume', value)
+            socket.on('volume', value => {
+                if (value <= 2.5 && this.bot.isPlaying) {
+                    this.bot.setVolume(value)
+                    io.broadcast.emit('volume', value)
                 }
             })
-            socket.on('logOut', function () {
-                bot.logOut()
+            socket.on('logOut', () => {
+                this.bot.logOut()
+            })
+            socket.on('replay', () => {
+                this.bot.replay()
             })
         });
     }
 
+    getFiles() {
+        fs.readdirSync(this.path).forEach(file => {
+            if (file !== '.dropbox' & file !== 'desktop.ini')
+                if (fs.lstatSync(this.path + file).isDirectory()) {
+                    let json = {}
+                    let files = []
+                    json.folder = file
+                    fs.readdirSync(this.path + file).forEach(folderFile => {
+                        files.push(folderFile)
+                    })
+                    json.files = files
+                    this.tree.push(json)
+            
+
+                } else {
+
+                }
+        })
+    }
+
+    
+
     express() {
+        app.get('/files/', (req, res) => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.write(JSON.stringify(this.tree))
+            return res.end()
+        })
+
         app.get('/', (req, res) => {
             res.writeHead(200, { 'Content-Type': 'text/html' });
             res.write("<meta charset='UTF-8'>");
@@ -97,4 +149,4 @@ class SoundBoard {
     }
 }
 
-soundBoard = new SoundBoard()
+soundBoard = new SoundBoard('C:/Users/Hillo/Dropbox/Tony Halme/', 'NDg5OTA3NDQ0NTg4MjE2MzMz.Dnxlag.39UBbrx6WwcK_WuDnzjA7PdjQLY', 'Maan Siirto Firma')

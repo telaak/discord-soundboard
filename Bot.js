@@ -10,10 +10,15 @@ class Bot {
         this.dispatcher
         this.isReady = false;
         this.isPlaying = false;
+        this.nowPlaying
         this.client.on('ready', () => {
             this.isReady = true
             this.voiceChannel = this.client.channels.find('name', voiceChannel)
         });
+    }
+
+    replay() {
+        play(this.nowPlaying)
     }
 
     stopLoop() {
@@ -22,6 +27,7 @@ class Bot {
 
     loop(fileName) {
         this.interval = setInterval(() => {
+            stopLoop()
             this.play(fileName)
         }, 50)
     }
@@ -32,6 +38,7 @@ class Bot {
             if (!this.isPlaying) {
                 this.dispatcher = target.includes('youtu') ? connection.playStream(yt(target, { audioonly: true })) : connection.playStream(path + target)
                 this.isPlaying = true;
+                this.nowPlaying = target
                 this.dispatcher.on('start', start => {
                     connection.player.streamingData.pausedTime = 0;
                 });

@@ -31,23 +31,25 @@ class SoundBoard {
 
     watchFileChanges() {
         this.watcher.on('create', (file, stats) => {
-            if (fs.lstatSync(file).isDirectory()) {
-                let object = {}
-                object.folder = this.getFilePathEnd(file).split("/")[0]
-                object.files = []
-                this.tree.push(object)
-                io.emit('newFolder', object)
-            } else {
-                let filePath = this.getFilePathEnd(file)
-                let treeArray = filePath.split("/")
-                let folderName = treeArray[0]
-                let fileName = treeArray[1]
-                let folder = this.getFolder(folderName)
-                let index = this.getIndex(folder, fileName)
-                folder.splice(index, 0, fileName)
-                io.emit('newFile', filePath)
-            }
-
+            console.log(stats)
+            setTimeout(() => {
+                if (fs.lstatSync(file).isDirectory()) {
+                    let object = {}
+                    object.folder = this.getFilePathEnd(file).split("/")[0]
+                    object.files = []
+                    this.tree.push(object)
+                    io.emit('newFolder', object)
+                } else {
+                    let filePath = this.getFilePathEnd(file)
+                    let treeArray = filePath.split("/")
+                    let folderName = treeArray[0]
+                    let fileName = treeArray[1]
+                    let folder = this.getFolder(folderName)
+                    let index = this.getIndex(folder, fileName)
+                    folder.splice(index, 0, fileName)
+                    io.emit('newFile', filePath)
+                }
+            }, 50);
         })
         this.watcher.on('delete', file => {
             if (fs.lstatSync(file).isDirectory()) {

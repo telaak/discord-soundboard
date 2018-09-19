@@ -94,7 +94,7 @@ const parseTreeFromFileName = fileName => fileName.split('/')
 const getFolder = folderName => tree.find(object => object.folder === folderName).files
 const getFolderDiv = folderName => document.getElementById('fileTree').findIndex(element => element.id > folderName)
 const getFileIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
-const getFolderIndex = folderName => this.tree.findIndex(object => object.folder > folderName)
+const getFolderIndex = folderName => tree.findIndex(object => object.folder > folderName)
 const getUnorderedList = folderName => document.getElementById(folderName).getElementsByTagName('ul')[0]
 
 socket.on('newFile', function (filePath) {

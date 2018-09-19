@@ -41,7 +41,7 @@ class SoundBoard {
             io.emit('newFile', filePath)
         })
         this.watcher.on('delete', file => {
-            let filePath = getFilePathEnd(file)
+            let filePath = this.getFilePathEnd(file)
             let treeArray = filePath.split("/")
             let folderName = treeArray[0]
             let fileName = treeArray[1]

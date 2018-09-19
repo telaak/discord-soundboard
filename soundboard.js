@@ -31,7 +31,6 @@ class SoundBoard {
 
     watchFileChanges() {
         this.watcher.on('create', (file, stats) => {
-            console.log(stats)
             setTimeout(() => {
                 if (fs.lstatSync(file).isDirectory()) {
                     let object = {}

@@ -48,21 +48,17 @@ class SoundBoard {
                     folder.splice(index, 0, fileName)
                     io.emit('newFile', filePath)
                 }
-            }, 50);
+            }, 10);
         })
         this.watcher.on('delete', file => {
-            if (fs.lstatSync(file).isDirectory()) {
-
-            } else {
-                let filePath = this.getFilePathEnd(file)
-                let treeArray = filePath.split("/")
-                let folderName = treeArray[0]
-                let fileName = treeArray[1]
-                let folder = this.getFolder(folderName)
-                let index = this.getIndex(folder, fileName)
-                folder.splice(index, 1)
-                io.emit('fileDeleted', filePath)
-            }
+            let filePath = this.getFilePathEnd(file)
+            let treeArray = filePath.split("/")
+            let folderName = treeArray[0]
+            let fileName = treeArray[1]
+            let folder = this.getFolder(folderName)
+            let index = this.getIndex(folder, fileName)
+            folder.splice(index, 1)
+            io.emit('fileDeleted', filePath)
         })
     }
 

@@ -132,6 +132,7 @@ socket.on('newFolder', function (folderObject) {
     tree.splice(index, 0, folderName)
     let div = document.createElement('div')
     div.setAttribute('id', folderObject.folder)
+    div.textContent = folderObject.folder
     let ul = document.createElement('ul')
     div.appendChild(ul)
     fileTree.insertBefore(div, fileTree.childNodes[index])

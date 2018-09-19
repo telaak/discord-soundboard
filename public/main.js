@@ -118,7 +118,7 @@ socket.on('fileDeleted', function (filePath) {
     let fileName = treeArray[1]
     let folder = getFolder(folderName)
     let index = getIndex(folder, fileName)
-    folder.splice(index, 1)
+    folder.splice(index-1, 1)
     let ul = getUnorderedList(folderName)
-    ul.removeChild(ul.childNodes[index])
+    ul.removeChild(ul.childNodes[index-1])
 })

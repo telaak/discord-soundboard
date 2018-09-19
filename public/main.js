@@ -92,7 +92,9 @@ socket.on('nowPlaying', function (name, url = "") {
 
 const parseTreeFromFileName = fileName => fileName.split('/')
 const getFolder = folderName => tree.find(object => object.folder === folderName).files
-const getIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
+const getFolderDiv = folderName => document.getElementById('fileTree').findIndex(element => element.id > folderName)
+const getFileIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
+const getFolderIndex = folderName => this.tree.findIndex(object => object.folder > folderName)
 const getUnorderedList = folderName => document.getElementById(folderName).getElementsByTagName('ul')[0]
 
 socket.on('newFile', function (filePath) {
@@ -100,7 +102,7 @@ socket.on('newFile', function (filePath) {
     let folderName = treeArray[0]
     let fileName = treeArray[1]
     let folder = getFolder(folderName)
-    let index = getIndex(folder, fileName)
+    let index = getFileIndex(folder, fileName)
     folder.splice(index, 0, fileName)
     let ul = getUnorderedList(folderName)
     let li = document.createElement('li')
@@ -117,8 +119,21 @@ socket.on('fileDeleted', function (filePath) {
     let folderName = treeArray[0]
     let fileName = treeArray[1]
     let folder = getFolder(folderName)
-    let index = getIndex(folder, fileName)
-    folder.splice(index-1, 1)
+    let index = getFileIndex(folder, fileName)
+    folder.splice(index - 1, 1)
     let ul = getUnorderedList(folderName)
-    ul.removeChild(ul.childNodes[index-1])
+    ul.removeChild(ul.childNodes[index - 1])
+})
+
+socket.on('newFolder', function (folderObject) {
+    let fileTree = document.getElementById('fileTree')
+    let folderName = folderObject.folder
+    let index = getFolderIndex(folderName)
+    tree.splice(index, 0, folderName)
+    let fileTree = document.getElementById('fileTree')
+    let div = document.createElement('div')
+    div.setAttribute('id', folderObject.folder)
+    let ul = document.createElement('ul')
+    div.appendChild(ul)
+    fileTree.insertBefore(div, fileTree.childNodes[index])
 })

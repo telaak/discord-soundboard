@@ -24,11 +24,10 @@ class SoundBoard {
         this.socketIO()
         this.getFiles()
         this.watchFileChanges()
+        this.getFolder = folderName => this.tree.find(object => object.folder === folderName).files
+        this.getIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
+        this.getFilePathEnd = path => path.split("//")[1]
     }
-
-    getFolder = folderName => this.tree.find(object => object.folder === folderName).files
-    getIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
-    getFilePathEnd = path => path.split("//")[1]
 
     watchFileChanges() {
         this.watcher.on('create', (file, stats) => {

@@ -26,13 +26,30 @@ class SoundBoard {
         this.watchFileChanges()
     }
 
+    getFolder = folderName => this.tree.find(object => object.folder === folderName).files
+    getIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
+    getFilePathEnd = path => path.split("//")[1]
+
     watchFileChanges() {
-        this.watcher.on('create', (file, stats) => {  
-	    let treeArray = file.split("//")[1].split("/")
-            let folder = this.tree.find(object => object.folder === treeArray[0]).files
-            let index = folder.findIndex(letter => letter > treeArray[1])
-            folder.splice(index, 0, treeArray[1])
-            io.emit('newFile', file)
+        this.watcher.on('create', (file, stats) => {
+            let filePath = this.getFilePathEnd(file)
+            let treeArray = filePath.split("/")
+            let folderName = treeArray[0]
+            let fileName = treeArray[1]
+            let folder = this.getFolder(folderName)
+            let index = this.getIndex(folder, fileName)
+            folder.splice(index, 0, fileName)
+            io.emit('newFile', filePath)
+        })
+        this.watcher.on('delete', file => {
+            let filePath = getFilePathEnd(file)
+            let treeArray = filePath.split("/")
+            let folderName = treeArray[0]
+            let fileName = treeArray[1]
+            let folder = this.getFolder(folderName)
+            let index = this.getIndex(folder, fileName)
+            folder.splice(index, 1)
+            io.emit('fileDeleted', filePath)
         })
     }
 
@@ -86,15 +103,15 @@ class SoundBoard {
         });
     }
 
-    getYoutubeInfo(url, key=this.googleApiKey) {
+    getYoutubeInfo(url, key = this.googleApiKey) {
         let id = url.split('=')[1]
         fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' + id + '&key=' + key)
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (myJson) {
-            io.emit('nowPlaying', myJson.items[0].snippet.title, url)
-        });
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (myJson) {
+                io.emit('nowPlaying', myJson.items[0].snippet.title, url)
+            });
     }
 
     getFiles() {
@@ -123,7 +140,7 @@ class SoundBoard {
         })
 
         app.get('/', (req, res) => {
-            res.sendFile('index.html', {root: __dirname })
+            res.sendFile('index.html', { root: __dirname })
         })
     }
 }

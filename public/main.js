@@ -72,6 +72,7 @@ function logOut() {
 
 function replay() {
     socket.emit('replay')
+    emitVolume()
 }
 
 socket.on('volume', function (value) {
@@ -79,9 +80,9 @@ socket.on('volume', function (value) {
     slider.value = value
 })
 
-socket.on('nowPlaying', function (name, url="") {
+socket.on('nowPlaying', function (name, url = "") {
     let nowPlaying = document.getElementById('nowPlaying')
-    if(url !== "") {
+    if (url !== "") {
         let html = "<a href='" + url + "'>" + name + "</a>"
         nowPlaying.innerHTML = html
     } else {
@@ -89,22 +90,35 @@ socket.on('nowPlaying', function (name, url="") {
     }
 })
 
-socket.on('newFile', function (fileName) {
-    let treeArray = fileName.split('//')[1].split('/')
-    let folder = tree.find(object => object.folder === treeArray[0]).files
-    let index = folder.findIndex(letter => letter > treeArray[1])
-    folder.splice(index, 0, treeArray[1])
-    console.log(folder)
-    let fileTree = document.getElementById('fileTree')
-    let ul = document.getElementById(treeArray[0]).getElementsByTagName('ul')[0]
+const parseTreeFromFileName = fileName => fileName.split('/')
+const getFolder = folderName => tree.find(object => object.folder === folderName).files
+const getIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
+const getUnorderedList = folderName => document.getElementById(folderName).getElementsByTagName('ul')[0]
+
+socket.on('newFile', function (filePath) {
+    let treeArray = parseTreeFromFileName(filePath)
+    let folderName = treeArray[0]
+    let fileName = treeArray[1]
+    let folder = getFolder(folderName)
+    let index = getIndex(folder, fileName)
+    folder.splice(index, 0, fileName)
+    let ul = getUnorderedList(folderName)
     let li = document.createElement('li')
     li.addEventListener('click', function (evt) {
-        socket.emit('playFile', fileName.split('//')[1])
+        socket.emit('playFile', filePath)
         emitVolume()
     })
-    li.textContent = treeArray[1]
-    console.log(ul)
-    console.log(ul.childNodes[index])
+    li.textContent = fileName
     ul.insertBefore(li, ul.childNodes[index])
+})
 
+socket.on('fileDeleted', function (filePath) {
+    let treeArray = parseTreeFromFileName(filePath)
+    let folderName = treeArray[0]
+    let fileName = treeArray[1]
+    let folder = getFolder(folderName)
+    let index = getIndex(folder, fileName)
+    folder.splice(index, 1)
+    let ul = getUnorderedList(folderName)
+    ul.removeChild(ul.childNodes[index])
 })

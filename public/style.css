@@ -6,6 +6,6 @@
     flex: 1;
 }
 
-a:hover {
+li:hover {
     cursor: pointer;
 }

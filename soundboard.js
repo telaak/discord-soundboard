@@ -25,6 +25,7 @@ class SoundBoard {
         this.getFiles()
         this.watchFileChanges()
         this.getFolder = folderName => this.tree.find(object => object.folder === folderName).files
+        this.getFolderIndex = folderName => tree.findIndex(object => object.folder > folderName)
         this.getIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
         this.getFilePathEnd = path => path.split("//")[1]
     }
@@ -36,7 +37,8 @@ class SoundBoard {
                     let object = {}
                     object.folder = this.getFilePathEnd(file).split("/")[0]
                     object.files = []
-                    this.tree.push(object)
+                    let index = this.getFolderIndex(object.folder)
+                    this.tree.splice(index, 0, object)
                     io.emit('newFolder', object)
                 } else {
                     let filePath = this.getFilePathEnd(file)

@@ -129,7 +129,7 @@ socket.on('newFolder', function (folderObject) {
     let fileTree = document.getElementById('fileTree')
     let folderName = folderObject.folder
     let index = getFolderIndex(folderName)
-    tree.splice(index, 0, folderName)
+    tree.splice(index, 0, folderObject)
     let div = document.createElement('div')
     div.setAttribute('id', folderObject.folder)
     div.textContent = folderObject.folder

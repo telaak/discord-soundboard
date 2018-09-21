@@ -98,6 +98,7 @@ const getFolderDiv = folderName => document.getElementById('fileTree').findIndex
 const getFileIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
 const getFolderIndex = folderName => tree.findIndex(object => object.folder > folderName)
 const getUnorderedList = folderName => document.getElementById(folderName).getElementsByTagName('ul')[0]
+const getFileIndexDel = (folder, fileName) => folder.findIndex(letter => letter == fileName)
 
 socket.on('newFile', function (filePath) {
   let treeArray = parseTreeFromFileName(filePath)
@@ -121,10 +122,10 @@ socket.on('fileDeleted', function (filePath) {
   let folderName = treeArray[0]
   let fileName = treeArray[1]
   let folder = getFolder(folderName)
-  let index = getFileIndex(folder, fileName)
-  folder.splice(index - 1, 1)
+  let index = getFileIndexDel(folder, fileName)
+  folder.splice(index, 1)
   let ul = getUnorderedList(folderName)
-  ul.removeChild(ul.childNodes[index - 1])
+  ul.removeChild(ul.childNodes[index])
 })
 
 socket.on('newFolder', function (folderObject) {

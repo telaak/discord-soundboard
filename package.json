@@ -1,0 +1,36 @@
+{
+  "name": "discord-soundboard",
+  "version": "1.0.0",
+  "description": "Simple soundboard interface for discord.js",
+  "main": "discord-soundboard.js",
+  "dependencies": {
+    "cors": "^2.8.4",
+    "discord.js": "^11.4.2",
+    "ffmpeg-binaries": "^4.0.0",
+    "express": "^4.16.3",
+    "hound": "^1.0.5",
+    "node-fetch": "^2.2.0",
+    "node-opus": "^0.3.0",
+    "socket.io": "^2.1.1",
+    "ytdl-core": "^0.25.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/telaak/discord-soundboard.git"
+  },
+  "keywords": [
+    "discord.js",
+    "discord",
+    "soundboard"
+  ],
+  "author": "telaak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/telaak/discord-soundboard/issues"
+  },
+  "homepage": "https://github.com/telaak/discord-soundboard#readme"
+}

@@ -7,8 +7,11 @@ const cors = require('cors')
 const Bot = require('./bot.js')
 const hound = require('hound')
 const fetch = require('node-fetch')
+const sanitize = require("sanitize-filename");
+const fileUpload = require('express-fileupload');
 app.use(express.static('public'))
 app.use(cors())
+app.use(fileUpload({ limits: { fileSize: 5 * 1024 * 1024 } }))
 
 class SoundBoard {
   constructor (path, botToken, channelName, googleApiKey) {
@@ -26,6 +29,8 @@ class SoundBoard {
     this.getFolderIndex = folderName => this.tree.findIndex(object => object.folder > folderName)
     this.getIndex = (folder, fileName) => folder.findIndex(letter => letter > fileName)
     this.getFilePathEnd = path => path.split('//')[1]
+    this.getFileIndexDel = (folder, fileName) => folder.findIndex(letter => letter == fileName)
+    this.getFolderIndexDel = folderName => this.tree.findIndex(object => object.folder == folderName)
   }
 
   watchFileChanges () {
@@ -55,13 +60,13 @@ class SoundBoard {
         let folderName = treeArray[0]
         let fileName = treeArray[1]
         let folder = this.getFolder(folderName)
-        let index = this.getIndex(folder, fileName)
-        folder.splice(index - 1, 1)
+        let index = this.getFileIndexDel(folder, fileName)
+        folder.splice(index, 1)
         io.emit('fileDeleted', filePath)
       } else {
         let folderName = this.getFilePathEnd(file)
-        let folderIndex = this.getFolderIndex(folderName)
-        this.tree.splice(folderIndex - 1, 1)
+        let folderIndex = this.getFolderIndexDel(folderName)
+        this.tree.splice(folderIndex, 1)
         io.emit('folderDeleted', folderName)
       }
     })
@@ -156,6 +161,24 @@ class SoundBoard {
 
     app.get('/', (req, res) => {
       res.sendFile('index.html', { root: __dirname })
+    })
+
+    app.post('/files', (req, res) => {
+      if (!req.files)
+        return res.status(400).send('No files were uploaded.')
+      for (let key in req.files) {
+        if (!req.files[key].truncated && fs.existsSync(this.path + key) && fs.lstatSync(this.path + key).isDirectory()) {
+          res.write(req.files[key].name + " sent succesfully.")
+          req.files[key].mv(this.path + key + '/' + sanitize(req.files[key].name), function (err) {
+            if (err) return res.status(500).send(err)
+          })
+        } else if (req.files[key].truncated) {
+          res.write(req.files[key].name + " is too large\n")
+        } else { 
+          res.write('Folder ' + key + ' does not exist')
+        }
+      }
+      return res.end()
     })
   }
 }

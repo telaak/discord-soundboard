@@ -11,19 +11,23 @@
 
 <body>
     <div class="container">
-        <div class="youtube">
-            <input id="youtube"><button onClick="emitTube()">Play</button><br>
+        <div id="nav">
+            <div id="nowPlaying"></div>
+            <div class="controls">
+                <button onClick="stopPlaying()">Stop</button>
+                <button onClick="pausePlaying()">Pause</button>
+                <button onClick="resumePlaying()">Resume</button>
+                <button onClick="replay()">Replay</button>
+            </div>
+            <div class="volumeSlider">
+                <input id="slider" type="range" min="0.1" max="2.5" step="0.05"><br>
+            </div>
+            <div class="youtube">
+                <input id="youtube"><button onClick="emitTube()">Play</button><br>
+            </div>
         </div>
-        <div class="controls">
-            <button onClick="stopPlaying()">Stop</button>
-            <button onClick="pausePlaying()">Pause</button>
-            <button onClick="resumePlaying()">Resume</button>
-            <button onClick="replay()">Replay</button>
-        </div>
-        <div class="volumeSlider">
-            <input id="slider" type="range" min="0.1" max="2.5" step="0.05"><br>
-        </div>
-        <div id="nowPlaying"></div><br><br>
+        <br>
+        <br>
         <div id="fileTree"></div>
     </div>
 </body>

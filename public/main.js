@@ -1,8 +1,8 @@
-let socket = io()
+let socket = io.connect('https://sb.laaksonen.me')
 let tree = []
 onload = function () {
   setTimeout(() => {
-    fetch('http://laaksonen.me:8080/files')
+    fetch('https://sb.laaksonen.me/api/files')
       .then(function (response) {
         return response.json()
       })
@@ -107,6 +107,7 @@ socket.on('newFile', function (filePath) {
   let fileName = treeArray[1]
   let folder = getFolder(folderName)
   let index = getFileIndex(folder, fileName)
+  if(index == -1) index = folder.length
   folder.splice(index, 0, fileName)
   let ul = getUnorderedList(folderName)
   let li = document.createElement('li')
@@ -133,6 +134,7 @@ socket.on('newFolder', function (folderObject) {
   let fileTree = document.getElementById('fileTree')
   let folderName = folderObject.folder
   let index = getFolderIndex(folderName)
+  if(index == -1) index = tree.length
   tree.splice(index, 0, folderObject)
   let div = document.createElement('div')
   div.setAttribute('id', folderObject.folder)

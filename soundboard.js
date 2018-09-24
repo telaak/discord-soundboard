@@ -7,11 +7,8 @@ const cors = require('cors')
 const Bot = require('./bot.js')
 const hound = require('hound')
 const fetch = require('node-fetch')
-const sanitize = require("sanitize-filename");
-const fileUpload = require('express-fileupload');
 app.use(express.static('public'))
 app.use(cors())
-app.use(fileUpload({ limits: { fileSize: 5 * 1024 * 1024 } }))
 
 class SoundBoard {
   constructor (path, botToken, channelName, googleApiKey) {
@@ -40,6 +37,7 @@ class SoundBoard {
           object.folder = this.getFilePathEnd(file).split('/')[0]
           object.files = []
           let index = this.getFolderIndex(object.folder)
+          if(index == -1) index = this.tree.length
           this.tree.splice(index, 0, object)
           io.emit('newFolder', object)
         } else {
@@ -49,6 +47,7 @@ class SoundBoard {
           let fileName = treeArray[1]
           let folder = this.getFolder(folderName)
           let index = this.getIndex(folder, fileName)
+          if(index == -1) index = folder.length
           folder.splice(index, 0, fileName)
           io.emit('newFile', filePath)
         }
@@ -89,6 +88,7 @@ class SoundBoard {
       socket.on('playFile', fileName => {
         if (!this.bot.isPlaying) {
           this.bot.play(fileName)
+          this.bot.client.user.setActivity(fileName, {type: 'LISTENING'})
           io.emit('nowPlaying', fileName)
         }
       })
@@ -122,7 +122,7 @@ class SoundBoard {
     })
   }
 
-  getYoutubeInfo (url, key = this.googleApiKey) {
+  getYoutubeInfo (url, key = this.googleApiKey, bot = this.bot) {
     let id = url.split('=')[1]
     fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' + id + '&key=' + key)
       .then(function (response) {
@@ -130,6 +130,7 @@ class SoundBoard {
       })
       .then(function (myJson) {
         io.emit('nowPlaying', myJson.items[0].snippet.title, url)
+        bot.client.user.setActivity(myJson.items[0].snippet.title, {type: 'LISTENING', url: url})
       })
   }
 
@@ -161,24 +162,6 @@ class SoundBoard {
 
     app.get('/', (req, res) => {
       res.sendFile('index.html', { root: __dirname })
-    })
-
-    app.post('/files', (req, res) => {
-      if (!req.files)
-        return res.status(400).send('No files were uploaded.')
-      for (let key in req.files) {
-        if (!req.files[key].truncated && fs.existsSync(this.path + key) && fs.lstatSync(this.path + key).isDirectory()) {
-          res.write(req.files[key].name + " sent succesfully.")
-          req.files[key].mv(this.path + key + '/' + sanitize(req.files[key].name), function (err) {
-            if (err) return res.status(500).send(err)
-          })
-        } else if (req.files[key].truncated) {
-          res.write(req.files[key].name + " is too large\n")
-        } else { 
-          res.write('Folder ' + key + ' does not exist')
-        }
-      }
-      return res.end()
     })
   }
 }

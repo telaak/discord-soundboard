@@ -31,7 +31,7 @@ class Bot {
       this.play(fileName)
     }, 50)
   }
-
+  
   play (target, path = this.path) {
     this.voiceChannel.join().then(connection => {
       if (!this.isPlaying) {
@@ -43,6 +43,7 @@ class Bot {
         })
         this.dispatcher.on('end', end => {
           this.isPlaying = false
+          this.client.user.setActivity('Soundboard', { type: 'LISTENING' });
         })
       }
     }).catch(err => console.log(err))

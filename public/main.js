@@ -85,7 +85,7 @@ socket.on('volume', function (value) {
 socket.on('nowPlaying', function (name, url = '') {
   let nowPlaying = document.getElementById('nowPlaying')
   if (url !== '') {
-    let html = "<a href='" + url + "'>" + name + '</a>'
+    let html = "<a target='_blank' rel='noopener noreferrer' href='" + url + "'>" + name + '</a>'
     nowPlaying.innerHTML = html
   } else {
     nowPlaying.textContent = name
@@ -151,3 +151,11 @@ socket.on('folderDeleted', function (folderName) {
   div.parentNode.removeChild(div)
 })
 
+function toggleDropDown() {
+  let nav = document.getElementById("topNav");
+  if (nav.className === "topnav") {
+    nav.className += " responsive";
+  } else {
+    nav.className = "topnav";
+  }
+}

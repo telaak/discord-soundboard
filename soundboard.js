@@ -28,6 +28,9 @@ class SoundBoard {
     this.getFilePathEnd = path => path.split('//')[1]
     this.getFileIndexDel = (folder, fileName) => folder.findIndex(letter => letter == fileName)
     this.getFolderIndexDel = folderName => this.tree.findIndex(object => object.folder == folderName)
+    this.array = ['TONY/aah.mp3', 'DIGIMON/digi.mp3', 'UGANDA/gwa.mp3', 'WARCRAFT/burn.mp3']
+    //setTimeout(() => {this.playList(this.array)}, 2000)
+    this.stopPlaying = false
   }
 
   watchFileChanges () {
@@ -59,6 +62,7 @@ class SoundBoard {
         let folderName = treeArray[0]
         let fileName = treeArray[1]
         let folder = this.getFolder(folderName)
+        if(folder == 'undefined') return
         let index = this.getFileIndexDel(folder, fileName)
         folder.splice(index, 1)
         io.emit('fileDeleted', filePath)
@@ -83,6 +87,15 @@ class SoundBoard {
     })
   }
 
+  playList(list, index = 0) {
+    this.bot.play(list[index]).then(message => {
+      if (index < list.length - 1) {
+       this.playList(list, index + 1)
+      }
+    })
+  }
+
+
   socketIO () {
     io.on('connection', socket => {
       socket.on('playFile', fileName => {
@@ -94,8 +107,12 @@ class SoundBoard {
       })
       socket.on('playUrl', url => {
         if (!this.bot.isPlaying) {
-          this.bot.play(url)
-          this.getYoutubeInfo(url)
+          if(url.includes('list=')) {
+            this.playYoutubePlaylist(url)
+          } else {
+            this.bot.play(url)
+            this.getYoutubeInfo(url)
+          }
         }
       })
       socket.on('stopPlaying', () => {
@@ -108,8 +125,14 @@ class SoundBoard {
         this.bot.resumePlaying()
       })
       socket.on('volume', value => {
-        if (value <= 2.5 && this.bot.isPlaying) {
+        if(value >= 2.5) return
+        if (this.bot.isPlaying) {
           this.bot.setVolume(value)
+          this.bot.volume = value
+          socket.broadcast.emit('volume', value)
+        } else {
+          this.bot.volume = value
+          console.log(this.bot.volume)
           socket.broadcast.emit('volume', value)
         }
       })
@@ -119,18 +142,35 @@ class SoundBoard {
       socket.on('replay', () => {
         this.bot.replay()
       })
+      socket.on('stopPlayList', () => {
+        this.stopPlaying = true
+      })
     })
   }
 
   getYoutubeInfo (url, key = this.googleApiKey, bot = this.bot) {
-    let id = url.split('=')[1]
+    let id = url.split('=')[1].substr(0,11)
     fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' + id + '&key=' + key)
-      .then(function (response) {
+      .then(response => response.json())
+      .then(json => {
+        io.emit('nowPlaying', json.items[0].snippet.title, url)
+        bot.client.user.setActivity(json.items[0].snippet.title, {type: 'LISTENING', url: url})
+      })
+  }
+
+  playYoutubePlaylist(url, key = this.googleApiKey, bot = this.bot) {
+    let id = url.split('list=')[1]
+    fetch('https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=' + id + '&key=' + key)
+      .then(response => {
         return response.json()
       })
-      .then(function (myJson) {
-        io.emit('nowPlaying', myJson.items[0].snippet.title, url)
-        bot.client.user.setActivity(myJson.items[0].snippet.title, {type: 'LISTENING', url: url})
+      .then(async json => {
+        for (let element in json.items) {
+          if(this.stopPlaying){this.stopPlaying = false; break}
+          io.emit('nowPlaying', json.items[element].snippet.title, 'https://youtube.com/watch?v=' + json.items[element].snippet.resourceId.videoId)
+          bot.client.user.setActivity(json.items[element].snippet.title, {type: 'Listening'})
+          await bot.play('https://youtube.com/watch?v=' + json.items[element].snippet.resourceId.videoId)
+        }
       })
   }
 

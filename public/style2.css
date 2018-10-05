@@ -1,0 +1,40 @@
+#fileTree {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 4em;
+}
+#fileTree > div {
+  flex: 1;
+  margin: 0.5em;
+}
+
+.nav>li {
+  float: left;
+}
+
+#nowPlaying a, #nowPlaying a:visited {
+  color: white;
+}
+
+a:hover {
+ color: lightgray;
+}
+
+#controlToggle {
+  margin-right: 1em;
+}
+
+li:hover {
+    cursor: pointer;
+}
+
+body {
+  background: #fafafa;
+}
+
+@media (max-width: 768px) {
+  #nowPlaying {
+    max-width: 80%;
+  }
+}

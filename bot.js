@@ -11,9 +11,11 @@ class Bot {
     this.isReady = false
     this.isPlaying = false
     this.nowPlaying = ''
+    this.volume = 1
+    this.client.on('error', () => console.log('error'))
     this.client.on('ready', () => {
       this.isReady = true
-      this.voiceChannel = this.client.channels.find('name', voiceChannel)
+      this.voiceChannel = this.client.channels.find(channel => channel.name === voiceChannel)
     })
   }
 
@@ -31,22 +33,28 @@ class Bot {
       this.play(fileName)
     }, 50)
   }
+
   
-  play (target, path = this.path) {
-    this.voiceChannel.join().then(connection => {
-      if (!this.isPlaying) {
-        this.dispatcher = target.includes('youtu') ? connection.playStream(yt(target, { audioonly: true })) : connection.playStream(path + target)
-        this.isPlaying = true
-        this.nowPlaying = target
-        this.dispatcher.on('start', start => {
-          connection.player.streamingData.pausedTime = 0
-        })
-        this.dispatcher.on('end', end => {
-          this.isPlaying = false
-          this.client.user.setActivity('Soundboard', { type: 'LISTENING' });
-        })
-      }
-    }).catch(err => console.log(err))
+  async play (target, path = this.path) {
+    let promise = new Promise((resolve, reject) => {
+      this.voiceChannel.join().then(connection => {
+        if (!this.isPlaying) {
+          this.dispatcher = target.includes('youtu') ? connection.playStream(yt(target, { audioonly: true }), {volume: this.volume}) : connection.playStream(path + target, {volume: this.volume})
+          this.isPlaying = true
+          this.nowPlaying = target
+          this.dispatcher.on('start', start => {
+            connection.player.streamingData.pausedTime = 0
+            this.dispatcher.setVolume(this.volume)
+          })
+          this.dispatcher.on('end', end => {
+            this.isPlaying = false
+            this.client.user.setActivity('Soundboard', { type: 'LISTENING' });
+            resolve()
+          })
+        }
+      }).catch(err => console.log(err))
+    })
+    return await promise
   }
 
   logOut () {

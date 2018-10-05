@@ -1,6 +1,15 @@
 let socket = io.connect('https://sb.laaksonen.me')
 let tree = []
 onload = function () {
+
+let input = document.getElementById("youtube");
+input.addEventListener("keypress", function(event) {
+    if (event.keyCode === 13) {
+        event.preventDefault()
+        emitTube()
+    }
+});
+
   setTimeout(() => {
     fetch('https://sb.laaksonen.me/api/files')
       .then(function (response) {
@@ -20,12 +29,13 @@ function buildFileTree () {
     let div = document.createElement('div')
     div.setAttribute('id', element.folder)
     let ul = document.createElement('ul')
+    ul.className = "list-group"
     div.textContent = element.folder
     element.files.forEach(file => {
       let li = document.createElement('li')
+      li.className = "list-group-item list-group-item-action"
       li.addEventListener('click', function (evt) {
         socket.emit('playFile', element.folder + '/' + file)
-        emitVolume()
       })
       li.textContent = file
       ul.appendChild(li)
@@ -74,7 +84,10 @@ function logOut () {
 
 function replay () {
   socket.emit('replay')
-  emitVolume()
+}
+
+function stopPlayList () {
+  socket.emit('stopPlayList')
 }
 
 socket.on('volume', function (value) {
@@ -113,7 +126,6 @@ socket.on('newFile', function (filePath) {
   let li = document.createElement('li')
   li.addEventListener('click', function (evt) {
     socket.emit('playFile', filePath)
-    emitVolume()
   })
   li.textContent = fileName
   ul.insertBefore(li, ul.childNodes[index])

@@ -7,6 +7,7 @@ const cors = require('cors')
 const Bot = require('./bot.js')
 const hound = require('hound')
 const fetch = require('node-fetch')
+const utf8 = require('utf8')
 app.use(express.static('public'))
 app.use(cors())
 
@@ -159,8 +160,8 @@ class SoundBoard {
   }
 
   searchYoutube(searchString, key = this.googleApiKey, bot = this.bot) {
-    searchString = searchString.replace(/\s/, '%20')
-    fetch('https://www.googleapis.com/youtube/v3/search?q=' + searchString + '&part=snippet&key=' + key)
+    searchString = utf8.encode(searchString.replace(/\s/, '%20'))
+    fetch('https://www.googleapis.com/youtube/v3/search?q=' + searchString + '&regionCode=FI&relevanceLanguage=FI&part=snippet&key=' + key)
       .then(response => {
         return response.json()
       })

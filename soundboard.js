@@ -101,17 +101,18 @@ class SoundBoard {
       socket.on('playFile', fileName => {
         if (!this.bot.isPlaying) {
           this.bot.play(fileName)
-          this.bot.client.user.setActivity(fileName, {type: 'LISTENING'})
-          io.emit('nowPlaying', fileName)
+          this.sendInfo(fileName)
         }
       })
       socket.on('playUrl', url => {
         if (!this.bot.isPlaying) {
           if(url.includes('list=')) {
             this.playYoutubePlaylist(url)
-          } else {
+          } else if(url.includes('youtu')) {
             this.bot.play(url)
             this.getYoutubeInfo(url)
+          } else {
+            this.searchYoutube(url)
           }
         }
       })
@@ -153,9 +154,25 @@ class SoundBoard {
     fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' + id + '&key=' + key)
       .then(response => response.json())
       .then(json => {
-        io.emit('nowPlaying', json.items[0].snippet.title, url)
-        bot.client.user.setActivity(json.items[0].snippet.title, {type: 'LISTENING', url: url})
+        this.sendInfo(json.items[0].snippet.title, url)
       })
+  }
+
+  searchYoutube(searchString, key = this.googleApiKey, bot = this.bot) {
+    searchString = searchString.replace(/\s/, '%20')
+    fetch('https://www.googleapis.com/youtube/v3/search?q=' + searchString + '&part=snippet&key=' + key)
+      .then(response => {
+        return response.json()
+      })
+      .then(json => {
+        this.sendInfo(json.items[0].snippet.title, 'https://youtube.com/watch?v=' + json.items[0].id.videoId)
+        this.bot.play('https://youtube.com/watch?v=' + json.items[0].id.videoId)
+      })
+  }
+
+  sendInfo(name, link = '') {
+    io.emit('nowPlaying', name, link) 
+    this.bot.client.user.setActivity(name, {type: 'Listening'})
   }
 
   playYoutubePlaylist(url, key = this.googleApiKey, bot = this.bot) {
@@ -167,8 +184,7 @@ class SoundBoard {
       .then(async json => {
         for (let element in json.items) {
           if(this.stopPlaying){this.stopPlaying = false; break}
-          io.emit('nowPlaying', json.items[element].snippet.title, 'https://youtube.com/watch?v=' + json.items[element].snippet.resourceId.videoId)
-          bot.client.user.setActivity(json.items[element].snippet.title, {type: 'Listening'})
+          this.sendInfo(json.items[element].snippet.title, 'https://youtube.com/watch?v=' + json.items[element].snippet.resourceId.videoId)
           await bot.play('https://youtube.com/watch?v=' + json.items[element].snippet.resourceId.videoId)
         }
       })

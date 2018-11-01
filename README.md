@@ -53,7 +53,11 @@ module.exports = config
 
 ## Use instructions
 
+Subfolders inside `config.path` are used as list titles with files inside the list. The backend also sends new folders and files through the WebSocket connection and they are then added to the DOM in the right alphabetic position.
 
+Clicking on files sends the file's path through WebSocket which the bot then plays. The site displays the current/last played file in the navbar. YouTube links' info is fetched through Google's YouTube API and used as a link to the current video.
+
+The audio player's controls, including the volume slider, are also synced through the WebSocket connection.
 
 ## Built With
 

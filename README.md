@@ -2,6 +2,8 @@
 
 Web soundboard interface for playing audio from local files or from YouTube. Uses Hound to listen for new files and folders, Socket.io to send WebSocket messages and Express for listing files and uploading new files.
 
+![Screenshot](https://laaksonen.me/soundboard.png)
+
 ## Getting Started
 
 ### Prerequisites
